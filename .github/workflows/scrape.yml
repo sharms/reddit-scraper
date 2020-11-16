@@ -19,7 +19,7 @@ jobs:
                             --user "${{ secrets.REDDIT_CLIENT_ID }}:${{ secrets.REDDIT_CLIENT_SECRET }}" \
                             https://www.reddit.com/api/v1/access_token | jq -r '.access_token')
         
-        while IFS='' read -R LINE || [ -n "${LINE}" ]; do
+        while IFS='' read -r LINE || [ -n "${LINE}" ]; do
           echo "Scraping ${LINE}"
 
           # Create data repo
