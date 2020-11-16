@@ -1,0 +1,38 @@
+name: Retrieve reddit linux subreddit data every 15 minutes
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron:  '*/15 * * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Fetch latest data
+      run: |-
+        access_token=$(curl -X POST -A "${{ secrets.REDDIT_USER_AGENT }}" \
+                            -d "grant_type=password&username=${{ secrets.REDDIT_USERNAME }}&password=${{ secrets.REDDIT_PASSWORD }}" \
+                            --user "${{ secrets.REDDIT_CLIENT_ID }}:${{ secrets.REDDIT_CLIENT_SECRET }}" \
+                            https://www.reddit.com/api/v1/access_token | jq -r '.access_token')
+        
+        declare -a subreddits=("linux" "apple" "programming" "sysadmin" "windows10" "amd" "chicago" "denver" "boston" "cincinnati" "waltdisneyworld" "technology" "pcgaming" "android" "rust" "java" "aws" "python" "science" "gaming" "opensuse" "golang" "archlinux")
+        for subreddit in "${subreddits[@]}"
+        do
+          if [ ! -d ${subreddit} ]; then
+            mkdir ${subreddit}
+          fi
+          curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${subreddit}/about.json > ${subreddit}/about.json
+          curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${subreddit}.json > ${subreddit}/${subreddit}.json
+        done
+    - name: Commit and push if it changed
+      run: |-
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "Latest data: ${timestamp}" || exit 0
+        git push
