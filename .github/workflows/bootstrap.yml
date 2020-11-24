@@ -15,9 +15,9 @@ jobs:
           echo "Scraping ${LINE}"
           REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
           if git ls-remote "${REPO}"; then
-            echo "${REPO} already exists"
+            echo "reddit-${LINE}-data already exists"
           else
-            echo "Creating ${REPO}"
+            echo "Creating reddit-${LINE}-data"
             curl -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" --data "{\"name\":\"reddit-${LINE}-data\",\"visibility\":\"private\"}" https://api.github.com/user/repos
           fi
           # Don't trigger rate limits
