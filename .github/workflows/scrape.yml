@@ -1,4 +1,4 @@
-name: Retrieve reddit subreddit data every 15 minutes
+name: Import data every 15 minutes
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     steps:
     - name: Check out this repo
       uses: actions/checkout@v2
-    - name: Fetch latest data
+    - name: Fetch reddit data
       run: |-
         access_token=$(curl -X POST -A "${{ secrets.REDDIT_USER_AGENT }}" \
                             -d "grant_type=password&username=${{ secrets.REDDIT_USERNAME }}&password=${{ secrets.REDDIT_PASSWORD }}" \
@@ -46,3 +46,18 @@ jobs:
         done < ./subreddits
 
         wait
+    - name: Fetch hackernews data
+      run: |-
+        REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/hackernews-topstories-data.git"
+        git clone ${REPO}
+        cd hackernews-topstories-data
+
+        curl 'https://hacker-news.firebaseio.com/v0/topstories.json' -o topstories.json
+        cat topstories.json | jq -j '.[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' | head -n50 \
+        | xargs curl --parallel-max 5 > items.json
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "Latest data: ${timestamp}" || exit 0
+        git push
