@@ -1,7 +1,8 @@
 name: Create Repositories
-description: Create repositories to store data
+
 on:
   workflow_dispatch:
+
 jobs:
   scheduled:
     runs-on: ubuntu-latest
