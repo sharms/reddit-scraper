@@ -20,4 +20,6 @@ jobs:
             echo "Creating ${REPO}"
             curl -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" --data "{\"name\":\"reddit-${LINE}-data\",\"visibility\":\"private\"}" https://api.github.com/user/repos
           fi
+          # Don't trigger rate limits
+          sleep 5
         done < ./subreddits
