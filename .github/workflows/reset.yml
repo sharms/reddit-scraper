@@ -13,7 +13,6 @@ jobs:
       run: |-        
         while IFS='' read -r LINE || [ -n "${LINE}" ]; do
           echo "Deleting ${LINE}"
-          REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
-          curl -XDELETE -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" https://api.github.com/repos/sharms/reddit-${LINE}-data.git&
+          curl -XDELETE -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" https://api.github.com/repos/sharms/reddit-${LINE}-data&
         done < ./subreddits
         wait
