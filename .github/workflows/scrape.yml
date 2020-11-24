@@ -24,30 +24,20 @@ jobs:
           REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json > ${LINE}-about.json
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json > ${LINE}-subreddit.json
-        done < ./subreddits&
-
-        while IFS='' read -r LINE || [ -n "${LINE}" ]; do
-          echo "Checking out reddit-${LINE}-data"
-          REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
+          echo "Commiting data to reddit-${LINE}-data"
           (
+            REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
             git clone ${REPO}
             cd reddit-${LINE}-data
             git config user.name "Automated"
             git config user.email "actions@users.noreply.github.com"
-          )
-        done < ./subreddits&
-
-        wait
-
-        while IFS='' read -r LINE || [ -n "${LINE}" ]; do
-          echo "Commiting data to reddit-${LINE}-data"
-          (
-            cd reddit-${LINE}-data
             cp ../${LINE}-about.json about.json
             cp ../${LINE}-subreddit.json subreddit.json
             git add -A
             timestamp=$(date -u)
             git commit -m "Latest data: ${timestamp}" || exit 0
             git push
-          )
-        done < ./subreddits
+          )&
+        done < ./subreddits&
+
+        wait
