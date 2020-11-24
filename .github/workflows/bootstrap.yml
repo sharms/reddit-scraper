@@ -12,14 +12,13 @@ jobs:
     - name: Create repositories
       run: |-        
         while IFS='' read -r LINE || [ -n "${LINE}" ]; do
-          echo "Scraping ${LINE}"
+          echo "Creating git repo for ${LINE}"
           REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
           if git ls-remote "${REPO}"; then
             echo "reddit-${LINE}-data already exists"
           else
             echo "Creating reddit-${LINE}-data"
-            curl -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" --data "{\"name\":\"reddit-${LINE}-data\",\"visibility\":\"private\"}" https://api.github.com/user/repos
+            curl -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" --data "{\"name\":\"reddit-${LINE}-data\",\"private\":true}" https://api.github.com/user/repos&
           fi
-          # Don't trigger rate limits
-          sleep 5
         done < ./subreddits
+        wait

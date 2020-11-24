@@ -22,8 +22,12 @@ jobs:
         while IFS='' read -r LINE || [ -n "${LINE}" ]; do
           echo "Downloading ${LINE}"
           REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
-          curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json > ${LINE}-about.json
-          curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json > ${LINE}-subreddit.json
+          curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json \
+          jq '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos}' \
+          > ${LINE}-about.json
+          curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json \
+          | jq '.data.children | .[] | {title: .data.title, downs: .data.downs, ups: .data.ups, score: .data.score, created: .data.created, url: .data.url, permalink: .data.permalink, author: .data.author, is_video: .data.is_video, num_comments: .data.num_comments}' \
+          > ${LINE}-subreddit.json
           echo "Commiting data to reddit-${LINE}-data"
           (
             REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"

@@ -1,0 +1,19 @@
+name: Reset Repositories
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Delete repositories
+      run: |-        
+        while IFS='' read -r LINE || [ -n "${LINE}" ]; do
+          echo "Deleting ${LINE}"
+          REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
+          curl -XDELETE -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" https://api.github.com/repos/sharms/reddit-${LINE}-data.git&
+        done < ./subreddits
+        wait
