@@ -38,6 +38,6 @@ jobs:
             git commit -m "Latest data: ${timestamp}" || exit 0
             git push
           )&
-        done < ./subreddits&
+        done < ./subreddits
 
         wait
