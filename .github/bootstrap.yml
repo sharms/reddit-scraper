@@ -1,0 +1,22 @@
+name: Create Repositories
+description: Create repositories to store data
+on:
+  workflow_dispatch:
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Create repositories
+      run: |-        
+        while IFS='' read -r LINE || [ -n "${LINE}" ]; do
+          echo "Scraping ${LINE}"
+          repo="git@github.com:sharms/reddit-${LINE}-data.git"
+          if git ls-remote "${REPO}"; then
+            echo "${REPO} already exists"
+          else
+            echo "Creating ${REPO}"
+          fi
+          # Create data repo
+        done < ./subreddits
