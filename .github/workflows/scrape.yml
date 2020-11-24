@@ -51,11 +51,10 @@ jobs:
         REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/hackernews-topstories-data.git"
         git clone ${REPO}
         cd hackernews-topstories-data
-
         curl 'https://hacker-news.firebaseio.com/v0/topstories.json' -o topstories.json
-        cat topstories.json | jq -j '.[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' | head -n50 \
+        jq -j '.[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' topstories.json | head -n50 \
         | xargs curl --parallel-max 5 | jq -s > items.json
-        cat items.json | jq -j '.[] | select(.kids != null) | .kids[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' \
+        jq -j '.[] | select(.kids != null) | .kids[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' items.json \
         | xargs curl --parallel-max 5 | jq -s > comments.json
         git config user.name "Automated"
         git config user.email "actions@users.noreply.github.com"
