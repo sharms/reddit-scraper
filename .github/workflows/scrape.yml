@@ -26,7 +26,6 @@ jobs:
             git clone ${REPO}
             cd reddit-${LINE}-data
             curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json > about.json
-            sleep 1
             curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json > subreddit.json
             git config user.name "Automated"
             git config user.email "actions@users.noreply.github.com"
