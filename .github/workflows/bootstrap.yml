@@ -13,8 +13,8 @@ jobs:
       run: |-        
         while IFS='' read -r LINE || [ -n "${LINE}" ]; do
           echo "Creating git repo for ${LINE}"
-          REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data"
-          if git ls-remote "${REPO}"; then
+          REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
+          if git ls-remote ${REPO}; then
             echo "reddit-${LINE}-data already exists"
           else
             echo "Creating reddit-${LINE}-data"
@@ -22,8 +22,8 @@ jobs:
           fi
         done < ./subreddits
         
-        REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/hackernews-topstories-data"
-        if git ls-remote "${REPO}"; then
+        REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/hackernews-topstories-data.git"
+        if git ls-remote ${REPO}; then
           echo "hackernews-topstories-data already exists"
         else
           echo "Creating hackernews-topstories-data"
