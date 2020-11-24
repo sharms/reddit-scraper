@@ -13,7 +13,7 @@ jobs:
       run: |-        
         while IFS='' read -r LINE || [ -n "${LINE}" ]; do
           echo "Scraping ${LINE}"
-          REPO="git@github.com:sharms/reddit-${LINE}-data.git"
+          REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
           if git ls-remote "${REPO}"; then
             echo "${REPO} already exists"
           else
