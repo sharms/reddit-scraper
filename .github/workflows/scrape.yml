@@ -54,7 +54,7 @@ jobs:
 
         curl 'https://hacker-news.firebaseio.com/v0/topstories.json' -o topstories.json
         cat topstories.json | jq -j '.[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' | head -n50 \
-        | xargs curl --parallel-max 5 > items.json
+        | xargs curl --parallel-max 5 | jq -s > items.json
         git config user.name "Automated"
         git config user.email "actions@users.noreply.github.com"
         git add -A
