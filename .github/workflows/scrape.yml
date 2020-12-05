@@ -23,10 +23,10 @@ jobs:
           echo "Downloading ${LINE}"
           REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json \
-          | jq '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos}' \
+          | jq -c '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos}' \
           > ${LINE}-about.json
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json \
-          | jq '.data.children | .[] | {title: .data.title, score: .data.score, upvote_ratio: .data.upvote_ratio, created: .data.created, url: .data.url, author: .data.author, is_video: .data.is_video, num_comments: .data.num_comments}' \
+          | jq -c '.data.children | [ .[] | {title: .data.title, score: .data.score, upvote_ratio: .data.upvote_ratio, created: .data.created, url: .data.url, author: .data.author, is_video: .data.is_video, num_comments: .data.num_comments}]' \
           > ${LINE}-subreddit.json
           echo "Commiting data to reddit-${LINE}-data"
           (
@@ -53,9 +53,9 @@ jobs:
         cd hackernews-topstories-data
         curl 'https://hacker-news.firebaseio.com/v0/topstories.json' -o topstories.json
         jq -j '.[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' topstories.json | head -n50 \
-        | xargs curl --parallel-max 5 | jq -s > items.json
+        | xargs curl --parallel-max 5 | jq -sc > items.json
         jq -j '.[] | select(.kids != null) | .kids[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' items.json \
-        | xargs curl --parallel-max 5 | jq -s > comments.json
+        | xargs curl --parallel-max 5 | jq -sc > comments.json
         git config user.name "Automated"
         git config user.email "actions@users.noreply.github.com"
         git add -A
