@@ -1,0 +1,30 @@
+name: Import hackernews data every 15 minutes
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron:  '7,21,36,51 * * * *'
+
+jobs:
+  scheduled:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v2
+    - name: Fetch hackernews data
+      run: |-
+        REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/hackernews-topstories-data.git"
+        git clone ${REPO}
+        cd hackernews-topstories-data
+        curl 'https://hacker-news.firebaseio.com/v0/topstories.json' -o topstories.json
+        jq -j '.[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' topstories.json | head -n50 \
+        | xargs curl --parallel-max 5 | jq -sc > items.json
+        jq -j '.[] | select(.kids != null) | .kids[] | "https://hacker-news.firebaseio.com/v0/item/",.,".json\n"' items.json \
+        | xargs curl --parallel-max 5 | jq -sc > comments.json
+        git config user.name "Automated"
+        git config user.email "actions@users.noreply.github.com"
+        git add -A
+        timestamp=$(date -u)
+        git commit -m "Latest data: ${timestamp}" || exit 0
+        git push
