@@ -26,6 +26,7 @@ jobs:
           | jq -c '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos, icon: .data.community_icon}' \
           > ${LINE}-about.json || continue
           curl -Ol -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' ${LINE}-about.json) -o ${LINE}-icon.png || continue
+          echo curl -Ol -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' ${LINE}-about.json) -o ${LINE}-icon.png 
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json \
           | jq -c '.data.children | [ .[] | {title: .data.title, score: .data.score, upvote_ratio: .data.upvote_ratio, created: .data.created, url: .data.url, author: .data.author, is_video: .data.is_video, num_comments: .data.num_comments}]' \
           > ${LINE}-subreddit.json || continue
@@ -38,7 +39,7 @@ jobs:
             git config user.email "actions@users.noreply.github.com"
             cp ../${LINE}-about.json about.json
             cp ../${LINE}-subreddit.json subreddit.json
-            cp ../${LINE}-icon.png icon.png
+            cp ../${LINE}-icon.png icon.png || continue
             git add -A
             timestamp=$(date -u)
             git commit -m "Latest data: ${timestamp}" || exit 0
