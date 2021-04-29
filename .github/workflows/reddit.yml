@@ -23,8 +23,9 @@ jobs:
           echo "Downloading ${LINE}"
           REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json \
-          | jq -c '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos}' \
+          | jq -c '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos, icon: .data.icon_img, icon_size: .data.icon_size}' \
           > ${LINE}-about.json || continue
+          curl -Ol -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' ${LINE}-about.json) || continue
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json \
           | jq -c '.data.children | [ .[] | {title: .data.title, score: .data.score, upvote_ratio: .data.upvote_ratio, created: .data.created, url: .data.url, author: .data.author, is_video: .data.is_video, num_comments: .data.num_comments}]' \
           > ${LINE}-subreddit.json || continue
