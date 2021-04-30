@@ -25,11 +25,11 @@ jobs:
           # about.json
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json \
           | jq -c '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos, icon: .data.community_icon}' \
-          > ${LINE}-about.json || continue
+          > ${LINE}-about.json || echo "about.json download FAILED"
           # subreddit.json
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json \
           | jq -c '.data.children | [ .[] | {title: .data.title, score: .data.score, upvote_ratio: .data.upvote_ratio, created: .data.created, url: .data.url, author: .data.author, is_video: .data.is_video, num_comments: .data.num_comments}]' \
-          > ${LINE}-subreddit.json || continue
+          > ${LINE}-subreddit.json || echo "subreddit.json download FAILED"
           echo "Commiting data to reddit-${LINE}-data"
           (
             REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
@@ -39,7 +39,11 @@ jobs:
             git config user.email "actions@users.noreply.github.com"
             cp ../${LINE}-about.json about.json
             cp ../${LINE}-subreddit.json subreddit.json
-            if [ ! -s icon.png ]; then curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json | sed 's/\(.*\)\?.*/\1/g') > icon.png || continue; fi
+            if [ ! -s icon.png ]; then 
+                echo "icon not found or 0 size, downloading."
+                echo curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json | sed 's/\(.*\)\?.*/\1/g') > icon.png
+                curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json | sed 's/\(.*\)\?.*/\1/g') > icon.png || echo "icon.png download FAILED"
+            fi
             git add -A
             timestamp=$(date -u)
             git commit -m "Latest data: ${timestamp}" || exit 0
