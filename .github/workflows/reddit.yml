@@ -39,7 +39,7 @@ jobs:
             git config user.email "actions@users.noreply.github.com"
             cp ../${LINE}-about.json about.json
             cp ../${LINE}-subreddit.json subreddit.json
-            if [ ! -f icon.png ]; then curl -l -o icon.png -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json) || continue; fi
+            if [ ! -s icon.png ]; then curl -l -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json) > icon.png || continue; fi
             git add -A
             timestamp=$(date -u)
             git commit -m "Latest data: ${timestamp}" || exit 0
