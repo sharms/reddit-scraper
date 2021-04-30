@@ -41,7 +41,7 @@ jobs:
             cp ../${LINE}-subreddit.json subreddit.json
             if [ ! -s icon.png ]; then 
                 echo "icon not found or 0 size, downloading."
-                echo curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json | sed 's/\(.*\)\?.*/\1/g') > icon.png
+                echo curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json | sed 's/\(.*\)\?.*/\1/g') 
                 curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" $(jq -r '.icon' about.json | sed 's/\(.*\)\?.*/\1/g') > icon.png || echo "icon.png download FAILED"
             fi
             git add -A
