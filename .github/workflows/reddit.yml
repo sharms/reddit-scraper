@@ -24,7 +24,7 @@ jobs:
           REPO="https://sharms:${{ secrets.ACCESS_TOKEN }}@github.com/sharms/reddit-${LINE}-data.git"
           # about.json
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}/about.json \
-          | jq -c '{title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos, icon: .data.community_icon}' \
+          | jq -c 'if (.data.community_icon | length) != 0 then .icon = .data.community_icon else .icon = .data.icon_img end | {title: .data.title, active_user_count: .data.active_user_count, subscribers: .data.subscribers, public_description: .data.public_description, description: .data.description, allow_videos: .data.allow_videos, icon: .icon}' \
           > ${LINE}-about.json || echo "about.json download FAILED"
           # subreddit.json
           curl -H "Authorization: bearer ${access_token}" -A "${{ secrets.REDDIT_USER_AGENT }}" https://oauth.reddit.com/r/${LINE}.json \
