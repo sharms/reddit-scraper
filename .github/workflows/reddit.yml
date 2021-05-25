@@ -39,8 +39,10 @@ jobs:
             git config user.email "actions@users.noreply.github.com"
             cp ../${LINE}-about.json about.json
             cp ../${LINE}-subreddit.json subreddit.json
+            # Clean up older format
+            git rm *.png
             ICON_FILE=$(jq -r '.icon' about.json | awk -F? '{print $1}')
-            curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" ${ICON_FILE} > ${ICON_FILE##*/} || echo "icon.png download FAILED"
+            curl -l -A "${{ secrets.REDDIT_USER_AGENT }}" ${ICON_FILE} > icon.png || echo "icon.png download FAILED"
             git add -A
             timestamp=$(date -u)
             git commit -m "Latest data: ${timestamp}" || exit 0
